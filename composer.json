@@ -1,0 +1,12 @@
+{
+    "autoload": {
+        "psr-4": {
+            "Apiasoc\\": "app/"
+        }
+    },
+    "require": {
+        "firebase/php-jwt": "^6.3",
+        "vlucas/phpdotenv": "^5.4",
+        "samayo/bulletproof": "4.0.*"
+    }
+}
