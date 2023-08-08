@@ -39,7 +39,7 @@ function evaluate(&$data) {
 
         $auth->id_user = $result->data->id_user;
 
-        if ($auth->getUserById()) {
+        if ($auth->getDataUserById()) {
             return true;
         } elseif (Globals::getResult()['num_records'] !== 1) {
             Globals::updateResponse(400, 'Non unique record', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);
@@ -97,7 +97,7 @@ function evaluate(&$data) {
             try {
                 Helper::deleteFolder($target_path);
             } catch (\Exception $e) {
-                Globals::updateResponse(400, $e->message, 'Error deleting article images', basename(__FILE__, ".php"), __FUNCTION__);
+                Globals::updateResponse(400, $e, 'Error deleting article images', basename(__FILE__, ".php"), __FUNCTION__);
                 return true;
             }
 
@@ -120,7 +120,7 @@ function evaluate(&$data) {
             }
             Helper::writeLog('***************** Delete article', '');
         } catch (\Exception $e) {
-            Globals::updateResponse(400, $e->message, 'Error deleting article', basename(__FILE__, ".php"), __FUNCTION__);
+            Globals::updateResponse(400, $e, 'Error deleting article', basename(__FILE__, ".php"), __FUNCTION__);
             return true;
         }
 

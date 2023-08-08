@@ -18,15 +18,17 @@ function evaluate(&$data) {
 
         $auth = new Auth();
 
-        $user->getUserByEmail();
+        Helper::writeLog('getUserByAsociationUsername', '');
+        $user->getUserByAsociationUsername();
 
         if (Globals::getError() != '') {
             return true;
         } elseif (Globals::getResult()['num_records'] !== 0) {
-            Globals::updateResponse(400, 'There is already a user with this email', 'There is already a user with this email.', basename(__FILE__, ".php"), __FUNCTION__);
+            Globals::updateResponse(400, 'There is already a user with this name for this asociation', 'There is already a user with this name for this asociation.', basename(__FILE__, ".php"), __FUNCTION__);
             return true;
         }
 
+        Helper::writeLog('getAsociationById', '');
         if ($user->id_asociation_user > 0) {
             $asoc = new Asoc();
             $asoc->id_asociation = $user->id_asociation_user;
@@ -38,6 +40,10 @@ function evaluate(&$data) {
             return true;
         }
 
+        Helper::writeLog('Crear profile', '');
+        $user->profile_user = "asociado";
+        $user->status_user = "activo";
+
         if ($user->createProfile()) {
             return true;
         } elseif (Globals::getResult()['records_inserted'] !== 1) {
@@ -45,7 +51,37 @@ function evaluate(&$data) {
             return true;
         }
 
-        // Globals::updateResponse(200, '', 'ok', basename(__FILE__, ".php"), __FUNCTION__, $result);
+        $data_user = array();
+        $user->id_user = Globals::getResult()['last_insertId'];
+        if ($user->getDataUserById()) {
+            return true;
+        }
+        $data_user = array();
+        foreach ($user as $key => $value) {
+            if ($key !== 'password_user' && $key !== 'question_user' && $key !== 'answer_user') {
+                $data_user["$key"] = $value;
+            }
+        }
+
+        if ($user->id_asociation_user > 0) {
+            $asoc->id_asociation = $user->id_asociation_user;
+            if ($asoc->getAsociationById()) {
+                return true;
+            }
+            $data_asoc = array();
+            foreach ($asoc as $key => $value) {
+                $data_asoc["$key"] = $value;
+            }
+            $result = array(
+                'data_user' => $data_user,
+                'data_asoc' => $data_asoc,
+            );
+        } else {
+            Globals::updateResponse(400, 'Missing asociation', 'Missing asociation. Please, contact with the association manager.', basename(__FILE__, ".php"), __FUNCTION__);
+            return true;
+        }
+
+        Globals::updateResponse(200, '', 'ok', basename(__FILE__, ".php"), __FUNCTION__, $result);
         return false;
 
     }

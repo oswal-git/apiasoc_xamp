@@ -322,8 +322,8 @@ class Helper {
             }
 
         } catch (\Exception $e) {
-            print_r(array('estado' => false, 'msg' => $e->message . '!'));
-            return array('estado' => false, 'msg' => $e->message . '!');
+            print_r(array('estado' => false, 'msg' => $e));
+            return array('estado' => false, 'msg' => $e);
         }
 
     }
@@ -377,6 +377,12 @@ class Helper {
                 Helper::writeLog('delete dir', $directory);
                 rmdir($directory);
             }
+        }
+    }
+
+    public static function copyClass($classFrom, $classTo) {
+        foreach ($classFrom as $nombrePropiedad => $valorPropiedad) {
+            $classTo->$nombrePropiedad = is_null($valorPropiedad) ? '' : $valorPropiedad;
         }
     }
 }

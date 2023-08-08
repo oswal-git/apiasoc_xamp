@@ -49,7 +49,7 @@ function evaluate(&$data) {
 
             $data['user_id'] = $_POST['user_id'];
             $user->id_user = $data['user_id'];
-            if ($user->getUserById()) {
+            if ($user->getDataUserById()) {
                 return true;
             } elseif (Globals::getResult()['num_records'] !== 1) {
                 Globals::updateResponse(400, 'Non unique record', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);
@@ -57,7 +57,7 @@ function evaluate(&$data) {
             }
 
             $auth->id_user = $result->data->id_user;
-            if ($auth->getUserById()) {
+            if ($auth->getDataUserById()) {
                 return true;
             } elseif (Globals::getResult()['num_records'] !== 1) {
                 Globals::updateResponse(400, 'Non unique record', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);

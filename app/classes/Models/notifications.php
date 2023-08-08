@@ -10,6 +10,8 @@ use Apiasoc\Classes\Helper;
  */
 class Notifications extends Mysql {
 
+    public $id_user_notification_user;
+    public $id_user_notifications;
     public $id_asociation_notifications;
     public $id_article_notifications;
     public $state_notifications;
@@ -84,6 +86,18 @@ class Notifications extends Mysql {
 
     }
 
+    public function listNotificationsPendingByUser($call) {
+
+        $arrData = array(
+            $this->id_user_notifications,
+        );
+
+        $response = $this->callProcedure($call, $arrData);
+
+        return $response;
+
+    }
+
     public function getAllNotificationsForUser() {
 
         $sql = "SELECT	  n.id_asociation_notifications
@@ -151,7 +165,8 @@ class Notifications extends Mysql {
 
         Helper::writeLog('$sql', $sql);
         $arrData = array(
-            $this->id_article_item_article,
+            $this->id_asociation_notifications,
+            $this->id_article_notifications,
         );
         $response = $this->delete($sql, $arrData);
 

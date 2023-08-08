@@ -94,14 +94,15 @@ function evaluate(&$data) {
 
         $avatar = $user->avatar_user;
         Helper::writeLog('$avatar', $avatar);
+        Helper::writeLog('getUrlUploads', Globals::getUrlUploads());
         if ($avatar !== '') {
-            $pos = strpos($avatar, Globals::getUrlFiles());
+            $pos = strpos($avatar, Globals::getUrlUploads());
             if ($pos === false) {
                 Globals::updateResponse(400, 'Url files not found', 'Avatar not found', basename(__FILE__, ".php"), __FUNCTION__);
                 return true;
             }
             Helper::writeLog('$pos', $pos);
-            $rest = substr($avatar, $pos + strlen(Globals::getUrlFiles()));
+            $rest = substr($avatar, $pos + strlen(Globals::getUrlUploads()));
             $path = Globals::getDirFiles() . $rest;
             $target_path = dirname($path);
 
@@ -118,14 +119,14 @@ function evaluate(&$data) {
                     rmdir($target_path);
                 }
             } catch (\Exception $e) {
-                Globals::updateResponse(400, $e->message, 'Error deleting avatar', basename(__FILE__, ".php"), __FUNCTION__);
+                Globals::updateResponse(400, $e, 'Error deleting avatar', basename(__FILE__, ".php"), __FUNCTION__);
                 return true;
             }
         }
 
         if ($user->deleteUser()) {
             return true;
-        } elseif (Globals::getResult()['records_deleted'] !== 1) {
+        } elseif ((int) Globals::getResult()['records_deleted'] !== 1) {
             Globals::updateResponse(400, 'Non unique record', 'User not match', basename(__FILE__, ".php"), __FUNCTION__);
             return true;
         }

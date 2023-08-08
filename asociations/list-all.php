@@ -39,7 +39,7 @@ function evaluate(&$data) {
             Helper::writeLog(' $result->data->id_user', $result->data->id_user);
 
             $auth->id_user = $result->data->id_user;
-            if ($auth->getUserById()) {
+            if ($auth->getDataUserById()) {
                 switch (Globals::getResult()) {
                 case 'Record not found':
                     Globals::updateMessageResponse('User connected not exist');

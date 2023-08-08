@@ -12,6 +12,7 @@ use PDO;
  */
 class Mysql extends Connection {
     private object $db;
+    private $procedure;
     private $strQuery;
     private $arrValues;
 
@@ -111,8 +112,10 @@ class Mysql extends Connection {
             $resDelete = $delete->execute($this->arrValues);
             if ($resDelete) {
                 Helper::writeLog("Mysql: delete ok ", $delete->rowCount());
+                Helper::writeLog("Mysql: resDelete ", $resDelete);
+                Helper::writeLog('gettype $resDelete', gettype($resDelete));
                 Globals::updateResponse(200, '', 'ok', basename(__FILE__, ".php"), __FUNCTION__, array(
-                    "records_deleted" => $resDelete,
+                    "records_deleted" => (int) $resDelete,
                 ));
                 return false;
             } else {
@@ -122,6 +125,30 @@ class Mysql extends Connection {
                 ));
                 return true;
             }
+        } catch (\PDOException $e) {
+            Globals::updateResponse(404, $e->getMessage(), $e->getMessage(), basename(__FILE__, ".php"), __FUNCTION__);
+            return true;
+        }
+
+    }
+
+    public function callProcedure(string $call, $arrValues) {
+
+        $this->procedure = $call;
+        $this->arrValues = $arrValues;
+        try {
+            $sentencia = $this->db->prepare($this->procedure);
+            $resSentencia = $sentencia->execute($this->arrValues);
+            $respuesta = $sentencia->fetchall(PDO::FETCH_ASSOC);
+            Globals::updateResponse(200, '', 'ok', basename(__FILE__, ".php"), __FUNCTION__, array(
+                "num_records" => count($respuesta),
+                "date_updated_user" => '',
+                "records" => $respuesta,
+            ));
+            Helper::writeLog("Mysql: getAll -> num_records", count($respuesta));
+            Helper::writeLog("Mysql: getAll -> records", $respuesta);
+            return false;
+
         } catch (\PDOException $e) {
             Globals::updateResponse(404, $e->getMessage(), $e->getMessage(), basename(__FILE__, ".php"), __FUNCTION__);
             return true;

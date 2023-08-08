@@ -54,7 +54,7 @@ function evaluate(&$data) {
             return true;
         }
 
-        $auth->token_exp_user = '';
+        $auth->token_exp_user = 0;
         $auth->token_user = '';
 
         if ($auth->updateToken()) {

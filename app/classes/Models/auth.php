@@ -17,7 +17,6 @@ class Auth extends User {
     }
 
     public function getHeaders() {
-
     }
 
     public function createTokenJwt() {
@@ -120,6 +119,7 @@ class Auth extends User {
      *                         to select from
      * @return string
      */
+
     function generatePassword($length = 8, $keyspace = null) {
         if (is_null($keyspace)) {$keyspace = $_ENV['KEYSPACE'];}
         $str = '';

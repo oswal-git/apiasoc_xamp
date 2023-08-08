@@ -22,8 +22,9 @@ require_once realpath("../vendor/autoload.php");
 
 use Apiasoc\Classes\Globals;
 use Apiasoc\Classes\Helper;
+use Dotenv\Dotenv;
 
-$dotenv = Dotenv\Dotenv::createImmutable(dirname(__FILE__, 2));
+$dotenv = Dotenv::createImmutable(dirname(__FILE__, 2));
 $dotenv->load();
 
 $globals = new Globals();

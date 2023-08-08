@@ -10,16 +10,16 @@ use Apiasoc\Classes\Helper;
  */
 class Asoc extends Mysql {
 
-    public $id_asociation;
-    public $long_name_asociation;
-    public $short_name_asociation;
-    public $logo_asociation;
-    public $email_asociation;
-    public $name_contact_asociation;
-    public $phone_asociation;
-    public $date_deleted_asociation;
-    public $date_created_asociation;
-    public $date_updated_asociation;
+    public int $id_asociation;
+    public string $long_name_asociation;
+    public string $short_name_asociation;
+    public string $logo_asociation;
+    public string $email_asociation;
+    public string $name_contact_asociation;
+    public string $phone_asociation;
+    public string $date_deleted_asociation;
+    public string $date_created_asociation;
+    public string $date_updated_asociation;
 
     public function __construct() {
         // echo "Create Asoc\n";
@@ -107,15 +107,17 @@ class Asoc extends Mysql {
     }
 
     public function deleteAsociation() {
-        $sql = "DELETE FROM asociations
-                WHERE id_asociation = ?
-                  AND COALESCE(date_updated_asociation,'') = ? ";
-
-        Helper::writeLog('$sql', $sql);
         $arrData = array(
             $this->id_asociation,
             $this->date_updated_asociation,
         );
+
+        $sql = "DELETE FROM asociations
+                WHERE id_asociation = ?
+                  AND COALESCE(date_updated_asociation,'') = ? ";
+
+        Helper::writeLog('$arrData', $arrData);
+        Helper::writeLog('$sql', $sql);
         $response = $this->delete($sql, $arrData);
 
         return $response;

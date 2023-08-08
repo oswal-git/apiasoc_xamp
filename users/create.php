@@ -41,7 +41,7 @@ function evaluate(&$data) {
 
         $auth->id_user = $result->data->id_user;
 
-        if ($auth->getUserById()) {
+        if ($auth->getDataUserById()) {
             return true;
         } elseif (Globals::getResult()['num_records'] !== 1) {
             Globals::updateResponse(400, 'Non unique record', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);
@@ -67,12 +67,20 @@ function evaluate(&$data) {
         $user = new User();
 
         $user->email_user = $data['email_user'];
-        $user->getUserByEmail();
+        Helper::writeLog(' $user->email_user', $user->email_user);
+
+        if ($user->email_user == '') {
+            $user->getUserByAsociationUsername();
+            $error_text = 'user name';
+        } else {
+            $user->getUserByEmail();
+            $error_text = 'email';
+        }
 
         if (Globals::getError() != '') {
             return true;
         } elseif (Globals::getResult()['num_records'] !== 0) {
-            Globals::updateResponse(400, 'There is already a user with this email', 'There is already a user with this email.', basename(__FILE__, ".php"), __FUNCTION__);
+            Globals::updateResponse(400, `There is already a user with this {$error_text}`, `There is already a user with this {$error_text}`, basename(__FILE__, ".php"), __FUNCTION__);
             return true;
         }
         foreach ($data as $key => $value) {

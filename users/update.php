@@ -12,6 +12,7 @@ function evaluate(&$data) {
         $data = json_decode(file_get_contents("php://input"), true);
         Helper::writeLog('data', $data);
 
+        $user_old = new User();
         $user = new User();
         $auth = new Auth();
         $asoc = new Asoc();
@@ -80,9 +81,36 @@ function evaluate(&$data) {
             Globals::updateResponse(400, 'User not authorized to create user', 'User not authorized to create user.', basename(__FILE__, ".php"), __FUNCTION__);
             return true;
         }
+        Helper::copyClass($user, $user_old);
 
         foreach ($data as $key => $value) {
             $user->$key = $value;
+        }
+
+        if ($user->user_name_user !== $user_old->user_name_user) {
+            $res = $user->existUserByAsociationUsername();
+            if ($res['status']) {
+                return true;
+            }
+            if ($res['exist_user']) {
+                Globals::updateResponse(400, 'This user name has already being used in this asociation', 'This user name has already being used in this asociation', basename(__FILE__, ".php"), __FUNCTION__);
+                return true;
+            }
+        }
+
+        if ($user->email_user !== $user_old->email_user) {
+            if ($user->email_user !== '') {
+                $res = $user->existUserByEmail();
+                if ($res['status']) {
+                    return true;
+                }
+                if ($res['exist_user']) {
+                    Globals::updateResponse(400, 'There is already an user with this email', 'There is already an user with this email', basename(__FILE__, ".php"), __FUNCTION__);
+                    return true;
+                }
+            } else {
+                $user->profile_user = 'asociado';
+            }
         }
 
         if ($user->updateUser()) {
@@ -92,7 +120,7 @@ function evaluate(&$data) {
             return true;
         }
 
-        if ($user->getUserById()) {
+        if ($user->getDataUserById()) {
             return true;
         } elseif (Globals::getResult()['num_records'] !== 1) {
             Globals::updateResponse(400, 'Non unique record.', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);
