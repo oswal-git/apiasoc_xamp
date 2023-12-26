@@ -44,15 +44,10 @@ function evaluate(&$data) {
             return true;
         }
 
-        if ($token !== $user->token_user) {
-            Globals::updateResponse(400, 'Token not match', 'Token not match', basename(__FILE__, ".php"), __FUNCTION__);
-            return true;
-        }
-
         if ($auth->validateTokenJwt($token)) {
-            if (Globals::getError() !== 'Expired token') {
-                return true;
-            }
+            // if (Globals::getError() !== 'Expired token') {
+            return true;
+            // }
         }
 
         $result = (object) Globals::getResult();
@@ -60,8 +55,22 @@ function evaluate(&$data) {
         Helper::writeLog(' $result->data', $result->data);
         Helper::writeLog(' $result->data->id_user', $result->data->id_user);
 
-        if ($user->id_user === $result->data->id_user) {
-            // user query is himself
+        $auth->id_user = $result->data->id_user;
+
+        if ($auth->getDataUserById()) {
+            return true;
+        } elseif (Globals::getResult()['num_records'] !== 1) {
+            Globals::updateResponse(400, 'Non unique record', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);
+            return true;
+        } elseif ($token !== $auth->token_user) {
+            Globals::updateResponse(400, 'Token not match', 'Token not match', basename(__FILE__, ".php"), __FUNCTION__);
+            return true;
+        }
+
+        if ($auth->profile_user === 'superadmin') {
+            // power
+        } elseif (($auth->profile_user === 'admin') && ($auth->id_asociation_user === $user->id_asociation_user)) {
+            // partial power
         } else {
             Globals::updateResponse(400, 'User not authorized to modify this profile', 'User not authorized to modify this profile.', basename(__FILE__, ".php"), __FUNCTION__);
             return true;
@@ -73,18 +82,7 @@ function evaluate(&$data) {
             $user->$key = $value;
         }
 
-        if ($user_old->id_asociation_user != $user->id_asociation_user || $user_old->user_name_user != $user->user_name_user) {
-            $res = $user->existUserByAsociationUsername();
-            if ($res['status']) {
-                return true;
-            }
-            if ($res['exist_user']) {
-                Globals::updateResponse(400, 'This user name has already being used in this asociation', 'This user name has already being used in this asociation', basename(__FILE__, ".php"), __FUNCTION__);
-                return true;
-            }
-        }
-
-        if ($user->updateProfile()) {
+        if ($user->updateProfileStatus()) {
             return true;
         } elseif (Globals::getResult()['records_update'] !== 1) {
             Globals::updateResponse(400, 'Non unique record', 'User not match', basename(__FILE__, ".php"), __FUNCTION__);

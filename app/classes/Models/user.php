@@ -55,7 +55,6 @@ class User extends Mysql {
         $this->token_exp_user = 0;
         $this->time_notifications_user = 24;
         $this->language_user = 'es';
-        
 
         $arrDatos = array(
             $this->id_asociation_user,
@@ -184,7 +183,7 @@ class User extends Mysql {
     //         $this->id_user,
     //     );
 
-    //     $sql = "SELECT 	 u.id_user
+    //     $sql = "SELECT      u.id_user
     //                     ,u.id_asociation_user
     //                     ,u.user_name_user
     //                     ,u.email_user
@@ -199,16 +198,16 @@ class User extends Mysql {
     //                     ,u.avatar_user
     //                     ,u.phone_user
     //                     , COALESCE(u.date_deleted_user,'') as date_deleted_user
-	// 					, u.date_created_user
-	// 					, COALESCE(u.date_updated_user,'') as date_updated_user
+    //                     , u.date_created_user
+    //                     , COALESCE(u.date_updated_user,'') as date_updated_user
     //                     ,u.time_notifications_user
     //                     ,u.language_user
     //                     ,a.long_name_asociation
-	// 					,a.short_name_asociation
-	// 					,a.logo_asociation
-	// 					,a.email_asociation
-	// 					,a.name_contact_asociation
-	// 					,a.phone_asociation
+    //                     ,a.short_name_asociation
+    //                     ,a.logo_asociation
+    //                     ,a.email_asociation
+    //                     ,a.name_contact_asociation
+    //                     ,a.phone_asociation
     //             FROM users u
     //             LEFT OUTER JOIN asociations a
     //               ON ( u.id_asociation_user = a.id_asociation )
@@ -430,7 +429,7 @@ class User extends Mysql {
                 LEFT OUTER JOIN asociations a
                   ON ( u.id_asociation_user = a.id_asociation )
                 WHERE u.id_asociation_user = ?
-                ORDER BY u.email_user ASC;";
+                ORDER BY u.id_user ASC;";
 
         $arrDatos = array(
             $this->id_asociation_user,
@@ -493,7 +492,7 @@ class User extends Mysql {
             , $this->avatar_user
             , $this->phone_user
             , $this->time_notifications_user
-            , $this->language_user
+            , $this->language_user,
         );
 
         Helper::writeLog('$arrDatos', $arrData);
@@ -515,6 +514,7 @@ class User extends Mysql {
                             ,avatar_user
                             ,phone_user
                             ,time_notifications_user
+                            ,language_user
                         )
                         VALUES (?" . str_repeat(", ?", count($arrData) - 1) . ");";
 
@@ -536,6 +536,48 @@ class User extends Mysql {
         $arrDatos = array(
             $this->id_asociation_user
             , $this->user_name_user
+            , $this->time_notifications_user
+            , $this->language_user
+            , $this->id_user
+            , $this->date_updated_user,
+        );
+
+        $resUpdate = $this->update($sql, $arrDatos);
+        return $resUpdate;
+    }
+
+    public function updateProfileStatus() {
+        $sql = "UPDATE users
+                SET profile_user = ?
+                    , status_user = ?
+                WHERE id_user = ?
+                  and COALESCE(date_updated_user,'') = ? ";
+
+        $arrDatos = array(
+            $this->profile_user
+            , $this->status_user
+            , $this->id_user
+            , $this->date_updated_user,
+        );
+
+        $resUpdate = $this->update($sql, $arrDatos);
+        return $resUpdate;
+    }
+
+    public function updateProfileAvatar() {
+        $sql = "UPDATE users
+                SET id_asociation_user = ?
+                    , user_name_user = ?
+                    , avatar_user = ?
+                    , time_notifications_user = ?
+                    , language_user = ?
+                WHERE id_user = ?
+                  and COALESCE(date_updated_user,'') = ? ";
+
+        $arrDatos = array(
+            $this->id_asociation_user
+            , $this->user_name_user
+            , $this->avatar_user
             , $this->time_notifications_user
             , $this->language_user
             , $this->id_user
@@ -619,7 +661,7 @@ class User extends Mysql {
         $arrDatos = array(
             $this->date_last_notification_user
             , $this->date_updated_user
-            , $this->id_user
+            , $this->id_user,
         );
 
         $resUpdate = $this->update($sql, $arrDatos);
