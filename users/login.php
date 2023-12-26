@@ -30,9 +30,9 @@ function evaluate(&$data) {
         }
 
         $encode_pass = hash('sha256', $in_password . $_ENV['MAGIC_SEED']);
-        // echo "encode_pass: " . $encode_pass . "\n";
-        // echo "password_user: " . $auth->password_user . "\n";
         if ($encode_pass !== $auth->password_user) {
+            echo "encode_pass: " . $encode_pass . "\n";
+            echo "password_user: " . $auth->password_user . "\n";
             Globals::updateResponse(400, 'Missmatch password', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);
             return true;
         }

@@ -5,6 +5,8 @@ use Apiasoc\Classes\Globals;
 use Apiasoc\Classes\Helper;
 use Apiasoc\Classes\Models\Asoc;
 use Apiasoc\Classes\Models\Auth;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
 
 function evaluate(&$data) {
 
@@ -20,7 +22,13 @@ function evaluate(&$data) {
             // Helper::writeLog('$auth->$key', $auth->$key . ' = ' . $value);
         }
 
-        $auth->getUserByEmail();
+        if ($auth->email_user !== '') {
+            $email = true;
+            $auth->getUserByEmail();
+        } else {
+            $email = false;
+            $auth->getUserByAsociationUsername();
+        }
 
         if (Globals::getError() != '') {
             return true;
@@ -50,35 +58,76 @@ function evaluate(&$data) {
             return true;
         }
 
-        $subject = "Your Recovered Password";
+        $mail = new PHPMailer(true);
 
-        // echo "Please use this password to login " . $new_password . PHP_EOL;
-        $headers = 'MIME-Version: 1.0' . "\r\n";
-        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-        $headers .= 'From: ' . $asoc->name_contact_asociation . ' <' . $asoc->email_asociation . '>' . "\r\n" . 'CC: ' . 'oswal@workmail.com' . "\r\n";
+        try {
+            //code...
 
-        $message = '<html>';
-        $message .= '<head><title>Recuperación de la contraseña</title></head>';
-        $message .= '<body><h1>Recuperación de la contraseña</h1>';
+            // $mail->SMTPDebug = SMTP::DEBUG_SERVER; //Enable verbose debug output
+            $mail->SMTPDebug = SMTP::DEBUG_OFF; //Disable verbose debug output
+            $mail->isSMTP(); //Send using SMTP
+            $mail->Host = 'smtp.gmail.com'; //Set the SMTP server to send through
+            $mail->SMTPAuth = true; //Enable SMTP authentication
+            $mail->Username = 'eglos2022w@gmail.com'; //SMTP username
+            $mail->Password = 'ijvpqryisoxlovvo'; //SMTP password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; //Enable implicit TLS encryption.
+            $mail->Port = 465; //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
 
-        $message .= 'Hola, ' . $auth->user_name_user . ' ' . $auth->last_name_user;
-        $message .= '<br>Has solicitado un nuevo password.';
-        $message .= '<br>Utilize este password <br><b>' . $new_password . '</b></br> para poder ingresar';
-        $message .= '<br>Si no has sido tu el que has solicitado el nuevo password, ponte en contacto con tu administrador, ' . $asoc->name_contact_asociation . '.';
-        $message .= '<br>';
-        $message .= '<hr>';
-        $message .= '<br>';
-        $message .= 'El administrador<br>';
-        $message .= $asoc->name_contact_asociation . '.';
-        $message .= '<br>';
-        $message .= '</body>';
-        $message .= '</html>';
+            // Recipients
+            $mail->setFrom('noresponda@mail.es', 'admin');
+            // $mail->addAddress($auth->email_user,$auth->name_user);
+            if ($email) {
+                $mail->addAddress('prueba@workmail.com', $auth->name_user);
+                // $mail->addReplyTo('prueba@workmail.com',$auth->name_user);
+            } else {
+                $mail->addAddress('oswal@workmail.com', $auth->name_user);
+            }
+            // $mail->addCC('oswal@workmail.com','oswal');
+            $mail->addBCC('ocontrerasm@gmail.com', 'oswal');
 
-        // if (mail($auth->email_user, $subject, $message, $headers)) {
-        if (mail('prueba@workmail.com', $subject, $message, $headers)) {
-            // echo "Your Password has been sent to your email id" . PHP_EOL;
-        } else {
-            Globals::updateResponse(500, 'Failed mail send', 'Failed to Recover your password, try again', basename(__FILE__, ".php"), __FUNCTION__, $_SERVER['REQUEST_METHOD']);
+            // Attachments: Uno o varios ficheros
+            // $mail->addAttachment('file');
+
+            $mail->isHTML(true);
+            $mail->Subject = "Your Recovered Password";
+
+            $message = '<html>';
+            $message .= '<head><title>Recuperación de la contraseña</title></head>';
+            $message .= '<body><h1>Recuperación de la contraseña</h1>';
+
+            $message .= 'Hola, ' . $auth->user_name_user . ' ' . $auth->last_name_user;
+            $message .= '<br>Has solicitado un nuevo password.';
+            $message .= '<br>Utilize este password <br><b>' . $new_password . '</b></br> para poder ingresar';
+            $message .= '<br>Si no has sido tu el que has solicitado el nuevo password, ponte en contacto con tu administrador, ' . $asoc->name_contact_asociation . '.';
+            $message .= '<br>';
+            $message .= '<hr>';
+            $message .= '<br>';
+            $message .= 'El administrador<br>';
+            $message .= $asoc->name_contact_asociation . '.';
+            $message .= '<br>';
+            $message .= '</body>';
+            $message .= '</html>';
+
+            $mail->Body = $message;
+
+            Helper::writeLog('subject', $mail->Subject);
+            Helper::writeLog('message', $mail->Body);
+
+            if (!$mail->send()) {
+                // echo 'Error al enviar email';
+                Helper::writeLog("mail error; Message could not be sent. Mailer Error", $mail->ErrorInfo);
+                Globals::updateResponse(500, 'Mail error', 'Mail error', basename(__FILE__, ".php"), __FUNCTION__, $_SERVER['REQUEST_METHOD']);
+                return true;
+            } else {
+                // echo "Your Password has been sent to your email id" . PHP_EOL;
+                Helper::writeLog('mail', 'Your Password has been sent to your email id');
+            }
+
+        } catch (\Exception $e) {
+            Helper::writeLog("mail error; Message could not be sent. Mailer Error", $mail->ErrorInfo);
+            Helper::writeLog("mail error: e; Message could not be sent. Mailer Error", $e);
+            // echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+            Globals::updateResponse(500, 'Mail error', 'Mail error', basename(__FILE__, ".php"), __FUNCTION__, $_SERVER['REQUEST_METHOD']);
             return true;
         }
 

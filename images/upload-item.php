@@ -44,11 +44,13 @@ function evaluate(&$data) {
             // Helper::writeLog('$token', $data['token']);
             $data['cover'] = $_POST['cover'];
             $data['id_item_article'] = $_POST['id_item_article'];
-            $data['id_article_item_article'] = $_POST['id_article_item_article'];
+            $data['id_article_item_article'] = $_POST['id_article'];
             $data['name'] = $_POST['name'];
             $data['is_new'] = $_POST['is_new'];
             $data['index'] = $_POST['index'];
             $data['items'] = $_POST['items'];
+            $data['first'] = $_POST['first'];
+            $data['last'] = $_POST['last'];
 
             if ($data['is_new'] === 'true') {
                 $data['file_name'] = $_FILES['file']['name'];
@@ -60,6 +62,7 @@ function evaluate(&$data) {
             }
 
             $data['date_updated'] = $_POST['date_updated'];
+            $data['date_updated_article'] = $_POST['date_updated_article'];
             // Helper::writeLog('$date_updated', $data['date_updated']);
 
             if (!$data['token']) {
@@ -97,7 +100,7 @@ function evaluate(&$data) {
             } elseif (Globals::getResult()['num_records'] !== 1) {
                 Globals::updateResponse(400, 'Non unique record', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);
                 return true;
-            } elseif ($data['date_updated'] !== $article->date_updated_article) {
+            } elseif ($data['date_updated_article'] !== $article->date_updated_article) {
                 Globals::updateResponse(400, 'Record modified by another user', 'Record modified by another user. Refresh it, please.', basename(__FILE__, ".php"), __FUNCTION__);
                 // Helper::writeLog('gettype $data[date_updated]', gettype($data['date_updated']));
                 // Helper::writeLog('$data[date_updated]', $data['date_updated']);
@@ -118,7 +121,7 @@ function evaluate(&$data) {
             }
 
             //target folder
-            $target_path = Globals::getDirFiles() . "uploads" . DIRECTORY_SEPARATOR . $data['module'] . DIRECTORY_SEPARATOR . $data['prefix'];
+            $target_path = Globals::getDirUploads() . $data['module'] . DIRECTORY_SEPARATOR . $data['prefix'];
             $data['target_path'] = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $target_path);
 
             Helper::writeLog('$target_path', $data['target_path']);
@@ -132,7 +135,7 @@ function evaluate(&$data) {
             $chain = Helper::generateChain(6, 'letters');
             $data['name'] = $data['base_name'] . '-' . $chain;
 
-            $url_path = Globals::getUrlFiles() . "uploads" . '/' . $data['module'] . '/' . $data['prefix'];
+            $url_path = Globals::getUrlUploads() . $data['module'] . '/' . $data['prefix'];
             $data['url_path'] = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $url_path);
             //set target file path
             $target_file = $target_path . DIRECTORY_SEPARATOR . $data['name'] . "." . $data['ext'];

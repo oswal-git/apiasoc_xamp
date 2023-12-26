@@ -24,7 +24,7 @@ class ItemArticle extends Mysql {
     public function getItemArticleById() {
 
         $arrData = array(
-            $this->id_article,
+            $this->id_item_article,
         );
 
         $sql = "SELECT	  i.id_item_article

@@ -12,9 +12,11 @@ use Apiasoc\Classes\Models\User;
 
 function evaluate(&$data) {
 
-    // Helper::writeLog('$_POST', $_POST);
-    // Helper::writeLog('$_FILES', $_FILES);
-    // Helper::writeLog('$_FILES file', $_FILES['file']);
+    Helper::writeLog('$_POST', $_POST);
+    if (is_array($_FILES)) {
+        Helper::writeLog('$_FILES', $_FILES);
+        isset($_FILES['file']) ? Helper::writeLog('$_FILES file', $_FILES['file']) : 'No existe files en $_FILES';
+    }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -74,18 +76,20 @@ function evaluate(&$data) {
             $data['id'] = $_POST['user_id'];
             // Upload logo asociation
             if ($data['module'] === 'asociations') {
-                $asoc->id_asociation = $data['id'];
+                $data['id_asociation'] = $_POST['asoc_id'];
+                $data['date_updated_asociation'] = $_POST['date_updated_asociation'];
+                $asoc->id_asociation = $data['id_asociation'];
                 if ($asoc->getAsociationById()) {
                     return true;
                 } elseif (Globals::getResult()['num_records'] !== 1) {
                     Globals::updateResponse(400, 'Non unique record', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);
                     return true;
-                } elseif ($data['date_updated'] !== $asoc->date_updated_asociation) {
+                } elseif ($data['date_updated_asociation'] !== $asoc->date_updated_asociation) {
                     Globals::updateResponse(400, 'Record modified by another user', 'Record modified by another user. Refresh it, please. Logout and login again.', basename(__FILE__, ".php"), __FUNCTION__);
-                    Helper::writeLog('gettype $data[date_updated]', gettype($data['date_updated']));
-                    Helper::writeLog('$data[date_updated]', $data['date_updated']);
+                    Helper::writeLog('gettype $data[date_updated_asociation]', gettype($data['date_updated_asociation']));
+                    Helper::writeLog('$data[date_updated_asociation]', $data['date_updated_asociation']);
                     Helper::writeLog('gettype $asoc->date_updated', gettype($asoc->date_updated_asociation));
-                    Helper::writeLog('$asoc->date_updated', $asoc->date_updated_asociation);
+                    Helper::writeLog('$asoc->date_updated_asociation', $asoc->date_updated_asociation);
                     return true;
                 }
                 if ($auth->profile_user === 'superadmin') {
@@ -99,18 +103,24 @@ function evaluate(&$data) {
                 // Upload images of articles
             } else if ($data['module'] === 'articles') {
                 $data['cover'] = $_POST['cover'];
-                $article->id_article = $data['id'];
+                Helper::writeLog('gettype $data[date_updated]', gettype($data['date_updated']));
+                Helper::writeLog('gettype $data[date_updated]', gettype($data['date_updated']));
+                $data['id_article'] = $_POST['id_article'];
+                $data['id_asociation_article'] = $_POST['id_asociation_article'];
+                $data['date_updated_article'] = $_POST['date_updated_article'];
+                $article->id_article = (int) $data['id_article'];
+                $article->id_asociation_article = (int) $data['id_asociation_article'];
+                $article->date_updated_article = $data['date_updated_article'];
                 if ($article->getArticleById()) {
                     return true;
                 } elseif (Globals::getResult()['num_records'] !== 1) {
                     Globals::updateResponse(400, 'Non unique record', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);
                     return true;
-                } elseif ($data['date_updated'] !== $article->date_updated_article) {
+                } elseif ($data['date_updated_article'] !== $article->date_updated_article) {
                     Globals::updateResponse(400, 'Record modified by another user', 'Record modified by another user. Refresh it, please.', basename(__FILE__, ".php"), __FUNCTION__);
-                    Helper::writeLog('gettype $data[date_updated]', gettype($data['date_updated']));
-                    Helper::writeLog('$data[date_updated]', $data['date_updated']);
-                    Helper::writeLog('gettype $asoc->date_updated', gettype($asoc->date_updated_asociation));
-                    Helper::writeLog('$asoc->date_updated', $asoc->date_updated_asociation);
+                    Helper::writeLog('$data[date_updated_article]', $data['date_updated_article']);
+                    Helper::writeLog('gettype $article->date_updated_article', gettype($article->date_updated_article));
+                    Helper::writeLog('$article->date_updated_article', $article->date_updated_article);
                     return true;
                 }
                 Helper::writeLog('$auth->profile_user', $auth->profile_user);
@@ -155,7 +165,7 @@ function evaluate(&$data) {
             }
 
             //target folder
-            $target_path = Globals::getDirFiles() . "uploads" . DIRECTORY_SEPARATOR . $data['module'] . DIRECTORY_SEPARATOR . $data['prefix'];
+            $target_path = Globals::getDirUploads() . $data['module'] . DIRECTORY_SEPARATOR . $data['prefix'];
             $data['target_path'] = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $target_path);
 
             Helper::writeLog('$target_path', $data['target_path']);
@@ -182,6 +192,7 @@ function evaluate(&$data) {
                 }
             }
 
+            Helper::writeLog('After delete file', '');
             if ($data['action'] !== 'delete') {
 
                 $data['file_name'] = $_FILES['file']['name'];
@@ -192,7 +203,7 @@ function evaluate(&$data) {
                 $chain = Helper::generateChain(6, 'letters');
                 $data['name'] = $data['base_name'] . '-' . $chain;
 
-                $url_path = Globals::getUrlFiles() . "uploads" . '/' . $data['module'] . '/' . $data['prefix'];
+                $url_path = Globals::getUrlUploads() . $data['module'] . '/' . $data['prefix'];
                 $data['url_path'] = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $url_path);
                 //set target file path
                 $target_file = $target_path . DIRECTORY_SEPARATOR . $data['name'] . "." . $data['ext'];
@@ -235,7 +246,11 @@ function evaluate(&$data) {
 
             if ($data['module'] === 'asociations') {
                 $asoc->logo_asociation = $data['url_file'];
+                $asoc->date_updated_asociation = $data['date_updated_asociation'];
                 if ($asoc->updateLogo()) {
+                    return true;
+                } elseif (Globals::getResult()['records_update'] !== 1) {
+                    Globals::updateResponse(400, 'Logo not match', 'Logo not match', basename(__FILE__, ".php"), __FUNCTION__);
                     return true;
                 }
 
@@ -247,8 +262,11 @@ function evaluate(&$data) {
                 $item_article = new ItemArticle();
 
                 $article->cover_image_article = $data['url_file'];
-                $article->update_date_article = $data['date_updated'];
+                $article->date_updated_article = $data['date_updated_article'];
                 if ($article->updateCover()) {
+                    return true;
+                } elseif (Globals::getResult()['records_update'] !== 1) {
+                    Globals::updateResponse(400, 'Article not match', 'Article not match', basename(__FILE__, ".php"), __FUNCTION__);
                     return true;
                 }
 
@@ -330,6 +348,9 @@ function evaluate(&$data) {
             } else {
                 $user->avatar_user = $data['url_file'];
                 if ($user->updateAvatar()) {
+                    return true;
+                } elseif (Globals::getResult()['records_update'] !== 1) {
+                    Globals::updateResponse(400, 'Avatar not match', 'Avatar not match', basename(__FILE__, ".php"), __FUNCTION__);
                     return true;
                 }
                 if ($user->getDataUserById()) {

@@ -22,8 +22,9 @@ function evaluate(&$data) {
         //     var_dump($data['items'][$i]["text_item_article"]);
         // }
 
-        $id_article = $data['data']['id_article'];
-        $id_asociation_article = $data['data']['id_asociation_article'];
+        $id_article = (int) $data['data']['id_article'];
+        $id_asociation_article = (int) $data['data']['id_asociation_article'];
+        $date_updated_article = $data['data']['date_updated_article'];
 
         $auth = new Auth();
         $headers = Helper::getAuthorizationHeader();
@@ -40,9 +41,9 @@ function evaluate(&$data) {
             Globals::updateResponse(400, 'Token not was able', 'Token not was able', basename(__FILE__, ".php"), __FUNCTION__);
             return true;
         } elseif ($auth->validateTokenJwt($token)) {
-            if (Globals::getError() !== 'Expired token') {
-                return true;
-            }
+            // if (Globals::getError() !== 'Expired token') {
+            return true;
+            // }
         }
 
         $result = (object) Globals::getResult();
@@ -51,9 +52,9 @@ function evaluate(&$data) {
         Helper::writeLog(' $id_asociation_article', $id_asociation_article);
         Helper::writeLog(' (int) $id_asociation_article', (int) $id_asociation_article);
 
-        $auth->id_user = $result->data->id_user;
+        $auth->id_user = (int) $result->data->id_user;
 
-        if ($auth->getUserById()) {
+        if ($auth->getDataUserById()) {
             return true;
         } elseif (Globals::getResult()['num_records'] !== 1) {
             Globals::updateResponse(400, 'Non unique record', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);
@@ -89,6 +90,8 @@ function evaluate(&$data) {
         $article = new Article();
         Helper::writeLog('$auth->profile_user', $auth->profile_user);
         $article->id_article = $id_article;
+        $article->id_asociation_article = $id_asociation_article;
+        $article->date_updated_article = $date_updated_article;
         Helper::writeLog('$article->date_updated_article', $article->date_updated_article);
         if ($article->getArticleById()) {
             return true;
@@ -114,8 +117,34 @@ function evaluate(&$data) {
         Helper::writeLog(' $transacction', 'transacction');
         $article->initTransaccion();
 
-        if ($state_article_before !== $state_article_after && $state_article_after === 'notificar') {
-            $article->state_article = 'publicado';
+        // if ($state_article_before !== $state_article_after && $state_article_after === 'notificar') {
+        //     $article->state_article = 'publicado';
+        // }
+
+        if ($article->ind_notify_article !== 3) {
+            if ($state_article_before !== $state_article_after) {
+                switch (true) {
+                case ($article->state_article === 'redacción' && $article->ind_notify_article != 9):
+                    $article->ind_notify_article = 0;
+                    break;
+                case ($article->state_article === 'revisión' && $article->ind_notify_article != 9):
+                    $article->ind_notify_article = 0;
+                    break;
+                case ($article->state_article === 'publicado' && $article->ind_notify_article != 9):
+                    $article->date_notification_article = date('Y-m-d H:i:s', microtime(true));
+                    $article->ind_notify_article = 9;
+                    break;
+                case ($article->state_article === 'anulado'):
+                    $article->ind_notify_article = 3;
+                    break;
+                case ($article->state_article === 'expirado'):
+                    $article->ind_notify_article = 3;
+                    break;
+                default:
+                    # code...
+                    break;
+                }
+            }
         }
 
         if ($article->updateArticle()) {

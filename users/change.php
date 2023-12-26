@@ -33,9 +33,8 @@ function evaluate(&$data) {
         }
 
         $result = (object) Globals::getResult();
-        Helper::writeLog('gettype $result 2', gettype($result));
         Helper::writeLog(' $result->data', $result->data);
-        Helper::writeLog(' $result->data->id_user', $result->data->id_user);
+        // Helper::writeLog(' $result->data->id_user', $result->data->id_user);
 
         $data = json_decode(file_get_contents("php://input"), true);
         foreach ($data as $key => $value) {
@@ -45,7 +44,13 @@ function evaluate(&$data) {
         $in_password = $auth->password_user;
         $new_password = $auth->new_password_user;
 
-        $auth->getUserByEmail();
+        if ($auth->email_user !== '') {
+            $email = true;
+            $auth->getUserByEmail();
+        } else {
+            $email = false;
+            $auth->getUserByAsociationUsername();
+        }
 
         if (Globals::getError() != '') {
             return true;
@@ -92,6 +97,8 @@ function evaluate(&$data) {
                 $data_user["$key"] = $value;
             }
         }
+
+        $data_user['new_password_user'] = '';
 
         if ($auth->id_asociation_user > 0) {
             $asoc->id_asociation = $auth->id_asociation_user;

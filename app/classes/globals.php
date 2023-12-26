@@ -15,11 +15,13 @@ class Globals {
     const SPM = '.';
     const SCURRENCY = '€';
 
+    const URL_UPLOADS = 'http://apiasoc.es/uploads/';
     const URL_FILES = 'http://apiasoc.es/files/';
 
     private $dir_classes = array();
     private $dir_config;
     private static $dir_files;
+    private static $dir_uploads;
     private $dir_logs;
 
     private static $log_file;
@@ -63,10 +65,11 @@ class Globals {
         // $this->scurrency = '€';
 
         self::$dir_files = $this->base_dir . 'files/';
+        self::$dir_uploads = $this->base_dir . "uploads/";
         $this->dir_logs = self::$dir_files . "logs/";
 
-        self::$trace_log = $this->dir_logs . 'trace';
-        self::$log_file = $this->dir_logs . 'default';
+        self::$trace_log = $this->dir_logs . 'log';
+        self::$log_file = $this->dir_logs . 'debug';
 
         // array_push($this->dir_classes, $this->base_dir . "classes" . DIRECTORY_SEPARATOR);
         // array_push($this->dir_classes, $this->base_dir . "config" . DIRECTORY_SEPARATOR);
@@ -148,6 +151,9 @@ class Globals {
 
         // var_dump(self::$apiResponse);
         // var_dump($response);
+        http_response_code((int) self::$apiResponse['status']);
+
+        Helper::writeLog('echo json_encode($response)', json_encode($response));
         echo json_encode($response);
 
     }
@@ -229,6 +235,20 @@ class Globals {
      */
     public static function getDirFiles() {
         return self::$dir_files;
+    }
+
+    /**
+     * Get the value of dir_files
+     */
+    public static function getDirUploads() {
+        return self::$dir_uploads;
+    }
+
+    /**
+     * Get the value of dir_files
+     */
+    public static function getUrlUploads() {
+        return self::URL_UPLOADS;
     }
 
     /**

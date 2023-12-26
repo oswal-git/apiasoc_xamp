@@ -15,6 +15,8 @@ function evaluate(&$data) {
         $auth = new Auth();
         $asoc = new Asoc();
 
+        $date_updated_user = $data['date_updated_user'];
+
         $user->id_user = $data['id_user'];
 
         if ($user->getDataUserById()) {
@@ -22,7 +24,7 @@ function evaluate(&$data) {
         } elseif (Globals::getResult()['num_records'] !== 1) {
             Globals::updateResponse(400, 'Non unique record', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);
             return true;
-        } elseif ($data['date_updated_user'] !== $user->date_updated_user) {
+        } elseif ($date_updated_user !== $user->date_updated_user) {
             Globals::updateResponse(400, 'Record modified by another user', 'Record modified by another user. Refresh it, please. Logout and login again.', basename(__FILE__, ".php"), __FUNCTION__);
             return true;
         }
@@ -65,8 +67,21 @@ function evaluate(&$data) {
             return true;
         }
 
+        $user_old = clone $user;
+
         foreach ($data as $key => $value) {
             $user->$key = $value;
+        }
+
+        if ($user_old->id_asociation_user != $user->id_asociation_user || $user_old->user_name_user != $user->user_name_user) {
+            $res = $user->existUserByAsociationUsername();
+            if ($res['status']) {
+                return true;
+            }
+            if ($res['exist_user']) {
+                Globals::updateResponse(400, 'This user name has already being used in this asociation', 'This user name has already being used in this asociation', basename(__FILE__, ".php"), __FUNCTION__);
+                return true;
+            }
         }
 
         if ($user->updateProfile()) {
@@ -76,7 +91,7 @@ function evaluate(&$data) {
             return true;
         }
 
-        if ($user->getUserById()) {
+        if ($user->getDataUserById()) {
             return true;
         } elseif (Globals::getResult()['num_records'] !== 1) {
             Globals::updateResponse(400, 'Non unique record.', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);
