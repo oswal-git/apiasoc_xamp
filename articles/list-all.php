@@ -24,44 +24,53 @@ function evaluate(&$data) {
         $headers = Helper::getAuthorizationHeader();
         Helper::writeLog('headers', $headers);
 
-        $loged = false;
+        $logged = false;
+        $expired = false;
 
         if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
             $token = $matches[1];
             if ($token) {
-                if (!$auth->validateTokenJwt($token)) {
-                    $result = (object) Globals::getResult();
-                    Helper::writeLog('gettype $result 2', gettype($result));
-                    Helper::writeLog(' $result->data', $result->data);
-                    Helper::writeLog(' $result->data->id_user', $result->data->id_user);
-
-                    $auth->id_user = $result->data->id_user;
-                    if ($auth->getDataUserById()) {
-                        switch (Globals::getResult()) {
-                        case 'Record not found':
-                            Globals::updateMessageResponse('User connected not exist');
-                            break;
-                        case 'Duplicate record':
-                            Globals::updateMessageResponse('User connected not exist');
-                            break;
-                        default:
-                            break;
-                        }
+                if ($auth->validateTokenJwt($token)) {
+                    if (Globals::getError() !== 'Expired token') {
                         return true;
                     }
-
-                    if ($auth->token_user !== $token) {
-                        Globals::updateResponse(400, 'Missmatch token', 'Missmatch token. Reconnecte, please', basename(__FILE__, ".php"), __FUNCTION__);
-                    }
-                    $loged = true;
+                    Helper::writeLog('expired', 'expired');
+                    $expired = true;
                 }
-            }
 
+                $result = (object) Globals::getResult();
+                Helper::writeLog('gettype $result 2', gettype($result));
+                Helper::writeLog(' $result->data', $result->data);
+                Helper::writeLog(' $result->data->id_user', $result->data->id_user);
+
+                $auth->id_user = $result->data->id_user;
+                if ($auth->getDataUserById()) {
+                    switch (Globals::getResult()) {
+                    case 'Record not found':
+                        Globals::updateMessageResponse('User connected not exist');
+                        break;
+                    case 'Duplicate record':
+                        Globals::updateMessageResponse('User connected not exist');
+                        break;
+                    default:
+                        break;
+                    }
+                    return true;
+                }
+
+                if ($auth->token_user !== $token) {
+                    Globals::updateResponse(400, 'Missmatch token', 'Missmatch token. Reconnecte, please', basename(__FILE__, ".php"), __FUNCTION__);
+                    return true;
+                }
+
+                $logged = $expired ? false : true;
+
+            }
         }
 
         $article = new Article();
         switch (true) {
-        case !$loged:
+        case !$logged:
             $article->id_asociation_article = (int) str_repeat('9', 9);
             break;
         case $auth->profile_user === 'superadmin':
@@ -153,7 +162,7 @@ function evaluate(&$data) {
             $listArticles[$i]['items_article'] = $items;
         }
 
-        Globals::updateResponse(200, '', 'ok', basename(__FILE__, ".php"), __FUNCTION__, $listArticles);
+        Globals::updateResponse(200, '', $expired ? 'expired' : 'ok', basename(__FILE__, ".php"), __FUNCTION__, $listArticles);
         return false;
 
     } else {
