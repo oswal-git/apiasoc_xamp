@@ -169,9 +169,11 @@ function evaluate(&$data) {
                 # code...
                 foreach ($data['items'][$i] as $key => $value) {
                     // Helper::writeLog(' $key', $key);
-                    // Helper::writeLog(' $value', $value);
+                    // Helper::writeLog(' $value', $value);0
                     $item_article->$key = $value;
                 }
+                Helper::writeLog(' id_item_article: $item_article->id_item_article', $item_article->id_item_article);
+                Helper::writeLog(' id_item_article: $i                            ', $i);
                 $item_article->id_item_article = $i;
                 $item_article->id_article_item_article = $article->id_article;
                 if ($item_article->createItemArticle()) {
@@ -236,9 +238,11 @@ function evaluate(&$data) {
 
         for ($j = 0; $j < count($items); ++$j) {
             $image = $items[$j]['image_item_article'];
+            $idImage = $items[$j]['images_id_item_article'];
             Helper::writeLog('image', $image);
             if ($image === '') {
                 $image_item_article = array(
+                    "idImage" => $idImage,
                     "src" => '',
                     "nameFile" => '',
                     "filePath" => '',
@@ -249,6 +253,7 @@ function evaluate(&$data) {
                 );
             } else {
                 $image_item_article = array(
+                    "idImage" => $idImage,
                     "src" => $image,
                     "nameFile" => '',
                     "filePath" => '',
@@ -258,8 +263,8 @@ function evaluate(&$data) {
                     "isChange" => false,
                 );
             }
-            Helper::writeLog('image_item_article', $image_item_article);
-            $items[$j]['image_item_article'] = $image_item_article;
+            Helper::writeLog('image_map_item_article', $image_item_article);
+            $items[$j]['image_map_item_article'] = $image_item_article;
             Helper::writeLog('items[' . $j . ']', $items[$j]);
         }
 
@@ -269,6 +274,7 @@ function evaluate(&$data) {
         Helper::writeLog('cover', $cover);
         if ($cover === '') {
             $cover_image_article = array(
+                "idImage" => 0,
                 "src" => '',
                 "nameFile" => '',
                 "filePath" => '',
@@ -279,6 +285,7 @@ function evaluate(&$data) {
             );
         } else {
             $cover_image_article = array(
+                "idImage" => 0,
                 "src" => $cover,
                 "nameFile" => '',
                 "filePath" => '',

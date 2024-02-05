@@ -14,10 +14,11 @@ class ItemArticle extends Mysql {
     public $id_article_item_article;
     public $text_item_article;
     public $image_item_article;
+    public $images_id_item_article;
     public $date_created_item_article;
 
     public function __construct() {
-        // echo "Create Article\n";
+        echo "Create Article\n";
         parent::__construct();
     }
 
@@ -30,9 +31,12 @@ class ItemArticle extends Mysql {
         $sql = "SELECT	  i.id_item_article
 						, i.id_article_item_article
 						, i.text_item_article
-						, i.image_item_article
+						, COALESCE(im.src_images, '' ) as image_item_article
+						, i.images_id_item_article
 						, i.date_created_item_article
                 FROM item_article i
+                LEFT OUTER JOIN images im
+                  ON ( i.images_id_item_article = im.id_images )
                 WHERE i.id_item_article = ?;";
 
         $response = $this->getAll($sql, $arrData);
@@ -57,9 +61,12 @@ class ItemArticle extends Mysql {
         $sql = "SELECT 	  i.id_item_article
                         , i.id_article_item_article
                         , i.text_item_article
-                        , i.image_item_article
+                        , COALESCE(im.src_images, '' ) as image_item_article
+                        , i.images_id_item_article
 						, i.date_created_item_article
                 FROM item_article i
+                LEFT OUTER JOIN images im
+                  ON ( i.images_id_item_article = im.id_images )
                 WHERE i.id_article_item_article = ?
                 ORDER BY i.id_item_article ASC;";
 
@@ -87,26 +94,28 @@ class ItemArticle extends Mysql {
     }
 
     public function createItemArticle() {
-        $sql = "INSERT INTO item_article (
-                                      id_item_article
-                                    , id_article_item_article
-                                    , text_item_article
-                                    , image_item_article
-                                    )
-                        VALUES (?" . str_repeat(', ?', 3) . ")";
-
-        Helper::writeLog('$sql', $sql);
-
         $this->image_item_article = '';
 
         $arrDatos = array(
             $this->id_item_article
             , $this->id_article_item_article
             , $this->text_item_article
-            , $this->image_item_article,
+            , $this->image_item_article
+            , $this->images_id_item_article,
         );
 
         Helper::writeLog('$arrDatos', $arrDatos);
+
+        $sql = "INSERT INTO item_article (
+                                      id_item_article
+                                    , id_article_item_article
+                                    , text_item_article
+                                    , image_item_article
+                                    , images_id_item_article
+                                    )
+                        VALUES (?" . str_repeat(", ?", count($arrDatos) - 1) . ");";
+
+        Helper::writeLog('$sql', $sql);
 
         $resUpdate = $this->insert($sql, $arrDatos);
         return $resUpdate;
@@ -116,11 +125,13 @@ class ItemArticle extends Mysql {
 
         $sql = "UPDATE item_article
                 SET image_item_article = ?
+                   ,images_id_item_article = ?
                 WHERE id_item_article = ?
                   AND id_article_item_article = ? ";
 
         $arrDatos = array(
             $this->image_item_article
+            , $this->images_id_item_article
             , $this->id_item_article
             , $this->id_article_item_article,
         );

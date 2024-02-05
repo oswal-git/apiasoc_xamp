@@ -2,7 +2,7 @@
 namespace Apiasoc\classes;
 
 class Helper {
-    private static $debug = false;
+    private static $debug = true;
 
     public function __construct() {
     }

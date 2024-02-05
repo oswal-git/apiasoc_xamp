@@ -220,10 +220,12 @@ class Article extends Mysql {
                   AND a.cover_image_article != ''
                 UNION
                 SELECT	  'items-images' as kind
-						, i.image_item_article as image
+						, im.src_images as image
                 FROM item_article i
+                LEFT OUTER JOIN images im
+                  ON ( i.images_id_item_article = im.id_images )
                 WHERE i.id_article_item_article = ?
-                  AND i.image_item_article != '';";
+                  AND im.src_images != '';";
 
         $response = $this->getAll($sql, $arrData);
         if ($response) {
