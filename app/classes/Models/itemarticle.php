@@ -18,7 +18,7 @@ class ItemArticle extends Mysql {
     public $date_created_item_article;
 
     public function __construct() {
-        echo "Create Article\n";
+        // echo "Create Item Article\n";
         parent::__construct();
     }
 

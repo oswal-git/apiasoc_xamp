@@ -29,7 +29,7 @@ function evaluate(&$data) {
             // $headers = Helper::getAuthorizationHeader();
             // Helper::writeLog('headers', $headers);
 
-            // if (!preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+            // if (!preg_match('/Bearer\s(\S+)/', (string) $headers, $matches)) {
             //     Globals::updateResponse(400, 'Token not found in request', 'Token not found in request', basename(__FILE__, ".php"), __FUNCTION__);
             //     return true;
             // }
@@ -206,7 +206,7 @@ function evaluate(&$data) {
                 $url_path = Globals::getUrlUploads() . $data['module'] . '/' . $data['prefix'];
                 $data['url_path'] = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $url_path);
                 //set target file path
-                $target_file = $target_path . DIRECTORY_SEPARATOR . $data['name'] . "." . $data['ext'];
+                $target_file = $data['target_path'] . DIRECTORY_SEPARATOR . $data['name'] . "." . $data['ext'];
                 $data['target_file'] = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $target_file);
                 $url_file = $url_path . URL_SEPARATOR . $data['name'] . "." . $data['ext'];
                 $data['url_file'] = str_replace(array('/', '\\'), URL_SEPARATOR, $url_file);

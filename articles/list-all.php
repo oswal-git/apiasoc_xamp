@@ -27,7 +27,7 @@ function evaluate(&$data) {
         $logged = false;
         $expired = false;
 
-        if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+        if (preg_match('/Bearer\s(\S+)/', (string) $headers, $matches)) {
             $token = $matches[1];
             if ($token) {
                 if ($auth->validateTokenJwt($token)) {

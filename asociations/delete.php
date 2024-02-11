@@ -19,7 +19,7 @@ function evaluate(&$data) {
         $auth = new Auth();
 
         $headers = Helper::getAuthorizationHeader();
-        Helper::writeLog('headers', $headers);
+        Helper::writeLog('headers', (string) $headers);
 
         if (!preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
             Globals::updateResponse(400, 'Token not found in request', 'Token not found in request', basename(__FILE__, ".php"), __FUNCTION__);

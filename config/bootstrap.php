@@ -30,4 +30,4 @@ $dotenv->load();
 $globals = new Globals();
 
 $helper = new Helper();
-$helper->httpHeaderDev($_SERVER['REQUEST_METHOD']);
+$helper->httpHeaderDev($_SERVER["REQUEST_METHOD"]);

@@ -117,7 +117,7 @@ class Helper {
     }
 
     public static function displayArrayToText($array, &$output) {
-        static $innerLevel = 0;
+        static $innerLevel = 0.0;
         static $levels = 0;
         $fin = false;
         // static $output = '';
@@ -133,7 +133,7 @@ class Helper {
                 if (is_array($array[$i])) {
                     // $levels++;
                     // $innerLevel++;
-                    $output .= "\n" . $innerLevel . " -> " . str_repeat('    ', $innerLevel + 0.5) . "Item: " . $i;
+                    $output .= "\n" . $innerLevel . " -> " . str_repeat('    ', (int) ($innerLevel + 0.5)) . "Item: " . $i;
                     $levels++;
                     $innerLevel++;
                     self::displayArrayToText($array[$i], $output);
@@ -152,7 +152,7 @@ class Helper {
         } else {
             foreach ($array as $key => $value) {
                 if (is_array($value)) {
-                    $output .= "\n" . $innerLevel . " -> " . str_repeat('    ', $innerLevel * 0.5) . $key;
+                    $output .= "\n" . $innerLevel . " -> " . str_repeat('    ', (int) ($innerLevel + 0.5)) . $key;
                     $levels++;
                     $innerLevel++;
                     // $output .= str_repeat('    ', $innerLevel) . "num traces: " . count($value) . " \n";
@@ -237,7 +237,7 @@ class Helper {
         // . "#####################################################################:\n\n\n"
         // . "############# salidaText:\n"
         // . $salidaText . "\n"
-         . "#####################################################################:\n\n\n";
+        . "#####################################################################:\n\n\n";
 
         // Append to the log file
         if ($fd = @fopen($tracefile, "a")) {
@@ -306,7 +306,7 @@ class Helper {
             // . $input_data2 . "\n"
             // . "output data 2:\n"
             // . $output_data2 . "\n\n"
-             . "#####################################################################:\n\n\n";
+            . "#####################################################################:\n\n\n";
 
             $file_data = '';
             if (file_exists($tracefile)) {

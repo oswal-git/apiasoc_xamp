@@ -37,7 +37,7 @@ function evaluate(&$data) {
             return true;
         }
 
-        $auth->token_exp_user = time() + 60 * 60 * 6; // 6 hours
+        $auth->token_exp_user = time() + 60 * 60 * 24 * 365; // second * minuts * hours * days ...
         $auth->token_user = $auth->createTokenJwt();
         // echo "token: " . $auth->token_user . "\n";
         if ($auth->updateToken()) {

@@ -5,9 +5,9 @@
         }
     },
     "require": {
-        "firebase/php-jwt": "^6.3",
-        "vlucas/phpdotenv": "^5.4",
-        "samayo/bulletproof": "4.0.*",
-        "phpmailer/phpmailer": "^6.8"
+        "firebase/php-jwt": "^v6.10.0",
+        "vlucas/phpdotenv": "^v5.6.0",
+        "samayo/bulletproof": "v4.0.1",
+        "phpmailer/phpmailer": "^v6.9.1"
     }
 }

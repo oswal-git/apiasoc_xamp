@@ -29,7 +29,7 @@ function evaluate(&$data) {
         $headers = Helper::getAuthorizationHeader();
         Helper::writeLog('headers', $headers);
 
-        if (!preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+        if (!preg_match('/Bearer\s(\S+)/', (string) $headers, $matches)) {
             Globals::updateResponse(400, 'Token not found in request', 'Token not found in request', basename(__FILE__, ".php"), __FUNCTION__);
             return true;
         }
@@ -57,7 +57,7 @@ function evaluate(&$data) {
         Helper::writeLog(' $result->data', $result->data);
         Helper::writeLog(' $result->data->id_user', $result->data->id_user);
 
-        if ($user->user_id === $auth->user_id) {
+        if ($user->id_user === $auth->id_user) {
             // user query is himself
         } elseif ($auth->profile_user === 'superadmin') {
             // power

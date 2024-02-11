@@ -4,8 +4,8 @@ require_once "../config/bootstrap.php";
 use Apiasoc\Classes\Globals;
 use Apiasoc\Classes\Helper;
 use Apiasoc\Classes\Models\Auth;
-use Apiasoc\Classes\Models\User;
 use Apiasoc\Classes\Models\Notifications;
+use Apiasoc\Classes\Models\User;
 
 function evaluate(&$data) {
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -20,7 +20,7 @@ function evaluate(&$data) {
 
         $loged = false;
 
-        if (!preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+        if (!preg_match('/Bearer\s(\S+)/', (string) $headers, $matches)) {
             Globals::updateResponse(400, 'Token not found in request', 'Token not found in request', basename(__FILE__, ".php"), __FUNCTION__);
             return true;
         } else {
@@ -88,7 +88,7 @@ function evaluate(&$data) {
                 if ($i < count($listArticles['records']) - 1) {
                     $listIds .= $listArticles['records'][$i]['id_article'] . ', ';
                     Helper::writeLog('n  listIds', $listIds);
-                    
+
                 } else {
                     $listIds .= $listArticles['records'][$i]['id_article'] . ')';
                     Helper::writeLog('last  listIds', $listIds);

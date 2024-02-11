@@ -21,7 +21,7 @@ function evaluate(&$data) {
 
         $loged = false;
 
-        if (!preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+        if (!preg_match('/Bearer\s(\S+)/', (string) $headers, $matches)) {
             Globals::updateResponse(400, 'Token not found in request', 'Token not found in request', basename(__FILE__, ".php"), __FUNCTION__);
             return true;
         } else {
