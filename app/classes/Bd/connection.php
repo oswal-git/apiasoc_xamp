@@ -5,6 +5,7 @@ use Apiasoc\Classes\Globals;
 use PDO;
 
 class Connection {
+    private static $instance;
     private $connection;
 
     public function __construct() {
@@ -31,8 +32,21 @@ class Connection {
         }
     }
 
+    public static function getInstance() {
+        if (!self::$instance) {
+            self::$instance = new Connection();
+        }
+        return self::$instance;
+    }
+
     public function connection() {
         return $this->connection;
     }
+
+    // Prevenir la clonación del objeto Singleton
+    private function __clone() {}
+
+    // Prevenir la deserialización del objeto Singleton
+    private function __wakeup() {}
 
 }
