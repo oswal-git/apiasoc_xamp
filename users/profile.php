@@ -12,6 +12,7 @@ function evaluate(&$data) {
         $data = json_decode(file_get_contents("php://input"), true);
 
         $user = new User();
+        $user_old = new User();
         $auth = new Auth();
         $asoc = new Asoc();
 
@@ -68,9 +69,14 @@ function evaluate(&$data) {
         }
 
         $user_old = clone $user;
+        // foreach (get_object_vars($user) as $key => $value) {
+        //     $user_old->$key = $value;
+        // }
 
         foreach ($data as $key => $value) {
-            $user->$key = $value;
+            if (property_exists($user, $key)) {
+                $user->$key = $value;
+            }
         }
 
         if ($user_old->id_asociation_user != $user->id_asociation_user || $user_old->user_name_user != $user->user_name_user) {

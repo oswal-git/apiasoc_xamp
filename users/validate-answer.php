@@ -14,7 +14,9 @@ function evaluate(&$data) {
         $asoc = new Asoc();
 
         foreach ($data as $key => $value) {
-            $auth->$key = $value;
+            if (property_exists($auth, $key)) {
+                $auth->$key = $value;
+            }
         }
 
         Helper::writeLog('data', $data);

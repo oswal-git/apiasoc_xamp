@@ -102,7 +102,9 @@ class Asoc extends Mysql {
 
     public function fillAsoc($record) {
         foreach ($record as $key => $value) {
-            $this->$key = $value;
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
         }
     }
 

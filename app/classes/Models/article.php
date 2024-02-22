@@ -188,7 +188,7 @@ class Article extends Mysql {
         $sql .= ($this->category_article !== '') ? " AND a.category_article = ?  " : " ";
         $sql .= ($this->subcategory_article !== '') ? " AND a.subcategory_article = ?  " : " ";
 
-        $sql .= " ORDER BY a.publication_date_article DESC;";
+        $sql .= " ORDER BY a.publication_date_article DESC, COALESCE(a.date_updated_article,'') DESC;";
 
         $arrData = array(
             $this->id_asociation_article,

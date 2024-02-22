@@ -58,7 +58,9 @@ function evaluate(&$data) {
         $user = new User();
 
         foreach ($data as $key => $value) {
-            $user->$key = $value;
+            if (property_exists($user, $key)) {
+                $user->$key = $value;
+            }
         }
         Helper::writeLog('$data[date_updated_user]', $data['date_updated_user']);
         Helper::writeLog('gettype $data[date_updated_user]', gettype($data['date_updated_user']));

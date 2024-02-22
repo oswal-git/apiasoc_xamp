@@ -96,7 +96,9 @@ function evaluate(&$data) {
         $article = new Article();
 
         foreach ($data['data'] as $key => $value) {
-            $article->$key = $value;
+            if (property_exists($article, $key)) {
+                $article->$key = $value;
+            }
         }
 
         $article->id_asociation_article = $id_asociation_article;
@@ -170,7 +172,9 @@ function evaluate(&$data) {
                 foreach ($data['items'][$i] as $key => $value) {
                     // Helper::writeLog(' $key', $key);
                     // Helper::writeLog(' $value', $value);
-                    $item_article->$key = $value;
+                    if (property_exists($item_article, $key)) {
+                        $item_article->$key = $value;
+                    }
                 }
                 $item_article->id_item_article = $i;
                 $item_article->id_article_item_article = $article->id_article;

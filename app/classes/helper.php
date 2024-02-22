@@ -280,17 +280,17 @@ class Helper {
         $salidaText = '';
         // Data input
         if (\is_array($data)) {
-            $input_data = self::displayArrayToText($data, $salidaText);
-            $input_data2 = $salidaText;
+            $input_data2 = self::displayArrayToText($data, $salidaText);
+            $input_data = $salidaText;
         } else {
-            $input_data = $data;
             $input_data2 = $data;
+            $input_data = $data;
         }
 
         $salidaText = '';
         // Data output
-        $output_data = self::displayArrayToText(Globals::getApiResponse(), $salidaText);
-        $output_data2 = $salidaText;
+        $output_data2 = self::displayArrayToText(Globals::getApiResponse(), $salidaText);
+        $output_data = $salidaText;
 
         // Append to the log file
         try {

@@ -2,6 +2,7 @@
 require_once "../config/bootstrap.php";
 // require_once realpath("../vendor/samayo/bulletproof/src/bulletproof.php");
 
+use Apiasoc\Classes\Bd\Mysql;
 use Apiasoc\Classes\Globals;
 use Apiasoc\Classes\Helper;
 use Apiasoc\Classes\Models\Article;
@@ -128,20 +129,22 @@ function evaluate(&$data) {
                 Helper::writeLog('delete file no exist', $file);
             }
 
+            $mysql = new Mysql();
+
             Helper::writeLog(' $transacction', 'init transacction');
-            $images->initTransaccion();
+            $mysql->initTransaccion();
 
             if ($images->deleteImages()) {
                 return true;
-                $images->abortTransaccion();
+                $mysql->abortTransaccion();
             } elseif (Globals::getResult()['records_deleted'] !== 1) {
                 Globals::updateResponse(400, 'Non unique record', 'Image record not match', basename(__FILE__, ".php"), __FUNCTION__);
-                $images->abortTransaccion();
+                $mysql->abortTransaccion();
                 return true;
             }
 
             Helper::writeLog(' $transacction', 'end transacction');
-            $images->endTransaccion();
+            $mysql->endTransaccion();
 
             Globals::updateResponse(200, '', 'ok', basename(__FILE__, ".php"), __FUNCTION__);
             Helper::writeLog(basename(__FILE__, ".php"), 'Finish ok');

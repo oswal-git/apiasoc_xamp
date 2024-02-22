@@ -110,7 +110,9 @@ function evaluate(&$data) {
         $state_article_before = $article->state_article;
 
         foreach ($data['data'] as $key => $value) {
-            $article->$key = $value;
+            if (property_exists($article, $key)) {
+                $article->$key = $value;
+            }
         }
         $state_article_after = $article->state_article;
 
@@ -170,7 +172,9 @@ function evaluate(&$data) {
                 foreach ($data['items'][$i] as $key => $value) {
                     // Helper::writeLog(' $key', $key);
                     // Helper::writeLog(' $value', $value);0
-                    $item_article->$key = $value;
+                    if (property_exists($item_article, $key)) {
+                        $item_article->$key = $value;
+                    }
                 }
                 Helper::writeLog(' id_item_article: $item_article->id_item_article', $item_article->id_item_article);
                 Helper::writeLog(' id_item_article: $i                            ', $i);

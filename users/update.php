@@ -84,7 +84,9 @@ function evaluate(&$data) {
         Helper::copyClass($user, $user_old);
 
         foreach ($data as $key => $value) {
-            $user->$key = $value;
+            if (property_exists($user, $key)) {
+                $user->$key = $value;
+            }
         }
 
         if ($user->user_name_user !== $user_old->user_name_user) {

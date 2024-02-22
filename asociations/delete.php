@@ -66,7 +66,9 @@ function evaluate(&$data) {
         $asoc = new Asoc();
 
         foreach ($data as $key => $value) {
-            $asoc->$key = $value;
+            if (property_exists($asoc, $key)) {
+                $asoc->$key = $value;
+            }
         }
 
         $user = new User();

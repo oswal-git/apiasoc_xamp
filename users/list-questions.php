@@ -19,7 +19,9 @@ function evaluate(&$data) {
         $user = new User();
 
         foreach ($data as $key => $value) {
-            $user->$key = $value;
+            if (property_exists($user, $key)) {
+                $user->$key = $value;
+            }
         }
 
         // Helper::writeLog("list-questions", $user);

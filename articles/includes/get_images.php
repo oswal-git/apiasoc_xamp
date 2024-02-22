@@ -24,7 +24,7 @@ function getImageData($id_article, $image_file, $target_base_path, $module, $pre
     $image_data['url_file'] = str_replace(array('/', '\\'), URL_SEPARATOR, $url_file_man);
 
     Helper::writeLog('$image_data', $image_data);
-    Helper::writeLog('$file_type', $image_file['file_type']);
+    Helper::writeLog('$file_type', $image_file['type']);
     Helper::writeLog('name', $image_file['name']);
     Helper::writeLog('$ext', $ext);
     Helper::writeLog('$url_path', $url_path);

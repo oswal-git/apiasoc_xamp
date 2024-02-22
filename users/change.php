@@ -38,7 +38,9 @@ function evaluate(&$data) {
 
         $data = json_decode(file_get_contents("php://input"), true);
         foreach ($data as $key => $value) {
-            $auth->$key = $value;
+            if (property_exists($auth, $key)) {
+                $auth->$key = $value;
+            }
         }
 
         $in_password = $auth->password_user;

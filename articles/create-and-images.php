@@ -2,6 +2,7 @@
 require_once "../config/bootstrap.php";
 require_once './includes/get_images.php';
 
+use Apiasoc\Classes\Bd\Mysql;
 use Apiasoc\Classes\Globals;
 use Apiasoc\Classes\Helper;
 use Apiasoc\Classes\Models\Article;
@@ -12,6 +13,7 @@ use Apiasoc\Classes\Models\ItemArticle;
 use Apiasoc\Classes\Models\Notifications;
 
 function evaluate(&$data) {
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         try {
@@ -26,7 +28,6 @@ function evaluate(&$data) {
             $data['action'] = $_POST['action'];
             $data['module'] = $_POST['module'];
             $data['prefix'] = $_POST['prefix'];
-            $data['token'] = $_POST['token'];
             $data['user_name'] = $_POST['user_name'];
             $data['images'] = array();
 
@@ -61,6 +62,10 @@ function evaluate(&$data) {
                 }
             }
 
+            $mysql = new Mysql();
+            // $db = $mysql->getInstance();
+            // $conexion = $db->connection();
+
             $id_asociation_article = (int) $data['article']['id_asociation_article'];
 
             $logged = false;
@@ -68,7 +73,16 @@ function evaluate(&$data) {
 
             // Validate user connected
             $auth = new Auth();
-            $token = $data['token'];
+            $headers = Helper::getAuthorizationHeader();
+            // Helper::writeLog('headers', $headers);
+
+            if (!preg_match('/Bearer\s(\S+)/', (string) $headers, $matches)) {
+                Globals::updateResponse(400, 'Token not found in request', 'Token not found in request', basename(__FILE__, ".php"), __FUNCTION__);
+                return true;
+            }
+
+            $token = $matches[1];
+
             if ($token) {
                 if ($auth->validateTokenJwt($token)) {
                     if (Globals::getError() !== 'Expired token') {
@@ -178,14 +192,14 @@ function evaluate(&$data) {
             }
 
             Helper::writeLog(' $transacction', 'transacction');
-            $article->initTransaccion();
+            $mysql->initTransaccion();
 
             if ($article->createArticle()) {
-                $article->abortTransaccion();
+                $mysql->abortTransaccion();
                 return true;
             } elseif (Globals::getResult()['records_inserted'] !== 1) {
                 Globals::updateResponse(400, 'Non unique record', 'Article not match', basename(__FILE__, ".php"), __FUNCTION__);
-                $article->abortTransaccion();
+                $mysql->abortTransaccion();
                 return true;
             }
             $article->id_article = Globals::getResult()['last_insertId'];
@@ -195,37 +209,36 @@ function evaluate(&$data) {
                 $notifications->id_asociation_notifications = $article->id_asociation_article;
                 $notifications->id_article_notifications = $article->id_article;
                 if ($notifications->createNotification()) {
-                    $article->abortTransaccion();
+                    $mysql->abortTransaccion();
                     return true;
                 } elseif (Globals::getResult()['records_inserted'] !== 1) {
                     Globals::updateResponse(400, 'Non unique record', 'Notification not match', basename(__FILE__, ".php"), __FUNCTION__);
-                    $article->abortTransaccion();
+                    $mysql->abortTransaccion();
                     return true;
                 }
             }
 
+            $item_article = new ItemArticle();
             $items = [];
             if (count($data['items_article']) > 0) {
-                $item_article = new ItemArticle();
-                $item_article->initTransaccion();
                 // for ($i = 0; $i < count($data['items_article']); $i++) {
                 foreach ($data['items_article'] as $index => $item) {
                     # code...
                     foreach ($item as $key => $value) {
                         // Helper::writeLog(' $key', $key);
                         // Helper::writeLog(' $value', $value);
-                        $item_article->$key = $value;
+                        if (property_exists($item_article, $key)) {
+                            $item_article->$key = $value;
+                        }
                     }
                     $item_article->id_item_article = $index;
                     $item_article->id_article_item_article = $article->id_article;
                     if ($item_article->createItemArticle()) {
-                        $article->abortTransaccion();
-                        $item_article->abortTransaccion();
+                        $mysql->abortTransaccion();
                         return true;
                     } elseif (Globals::getResult()['records_inserted'] !== 1) {
                         Globals::updateResponse(400, 'Non unique record', 'Item article not match', basename(__FILE__, ".php"), __FUNCTION__);
-                        $article->abortTransaccion();
-                        $item_article->abortTransaccion();
+                        $mysql->abortTransaccion();
                         return true;
                     }
                 }
@@ -238,6 +251,7 @@ function evaluate(&$data) {
 
             Helper::writeLog('$target_path', $target_base_path);
 
+            // Cover image
             if (isset($data['images']['cover'])) {
                 $image_file = $data['images']['cover'];
 
@@ -248,80 +262,70 @@ function evaluate(&$data) {
                 }
 
                 if ($article->getArticleById()) {
-                    $article->abortTransaccion();
-                    $item_article->abortTransaccion();
+                    $mysql->abortTransaccion();
                     return true;
                 } elseif (Globals::getResult()['num_records'] !== 1) {
                     Globals::updateResponse(400, 'Non unique record', 'User/password not match', basename(__FILE__, ".php"), __FUNCTION__);
-                    $article->abortTransaccion();
-                    $item_article->abortTransaccion();
+                    $mysql->abortTransaccion();
                     return true;
                 }
 
                 $article->cover_image_article = $image_data['url_file'];
                 if ($article->updateCover()) {
-                    $article->abortTransaccion();
-                    $item_article->abortTransaccion();
+                    $mysql->abortTransaccion();
                     return true;
                 } elseif (Globals::getResult()['records_update'] !== 1) {
                     Globals::updateResponse(400, 'Article not match', 'Article not match', basename(__FILE__, ".php"), __FUNCTION__);
-                    $article->abortTransaccion();
-                    $item_article->abortTransaccion();
+                    $mysql->abortTransaccion();
                     return true;
                 }
             }
 
             $images = new Images();
-            $images->initTransaccion();
 
-            foreach ($data['images']['items'] as $index => $item) {
-                if (isset($item['items_image'])) {
-                    $image_file = $item['items_image'];
+            if (isset($data['images']['items']) && count($data['images']['items']) > 0) {
+                foreach ($data['images']['items'] as $index => $item) {
+                    if (isset($item['items_image'])) {
+                        $image_file = $item['items_image'];
 
-                    $image_data = getImageData($article->id_article, $image_file, $target_base_path, $data['module'], $data['prefix']);
+                        $image_data = getImageData($article->id_article, $image_file, $target_base_path, $data['module'], $data['prefix']);
 
-                    if (moveUpload($image_data)) {
-                        return true;
+                        if (moveUpload($image_data)) {
+                            return true;
+                        }
+
+                        $images->src_images = $image_data['url_file'];
+                        $images->type_images = 'item';
+                        $images->article_id_images = $article->id_article;
+                        $images->item_article_id_images = $index;
+
+                        if ($images->createImage()) {
+                            return true;
+                            $mysql->abortTransaccion();
+                        } elseif (Globals::getResult()['records_inserted'] !== 1) {
+                            Globals::updateResponse(400, 'Non unique record', 'Article not match', basename(__FILE__, ".php"), __FUNCTION__);
+                            $mysql->abortTransaccion();
+                            return true;
+                        }
+
+                        $images->id_images = Globals::getResult()['last_insertId'];
+
+                        $item_article = new ItemArticle();
+
+                        $item_article->id_item_article = $index;
+                        $item_article->id_article_item_article = $article->id_article;
+                        $item_article->image_item_article = $image_data['url_file'];
+                        $item_article->images_id_item_article = $images->id_images;
+                        if ($item_article->updateImageItem()) {
+                            $mysql->abortTransaccion();
+                            return true;
+                        }
+
                     }
-
-                    $images->src_images = $image_data['url_file'];
-                    $images->type_images = 'item';
-                    $images->article_id_images = $article->id_article;
-                    $images->item_article_id_images = $index;
-
-                    if ($images->createImage()) {
-                        return true;
-                        $article->abortTransaccion();
-                        $item_article->abortTransaccion();
-                        $images->abortTransaccion();
-                    } elseif (Globals::getResult()['records_inserted'] !== 1) {
-                        Globals::updateResponse(400, 'Non unique record', 'Article not match', basename(__FILE__, ".php"), __FUNCTION__);
-                        $article->abortTransaccion();
-                        $item_article->abortTransaccion();
-                        $images->abortTransaccion();
-                        return true;
-                    }
-
-                    $images->id_images = Globals::getResult()['last_insertId'];
-
-                    $item_article = new ItemArticle();
-                    Helper::writeLog('$id_item_article', $data['id_item_article']);
-
-                    $item_article->id_item_article = $index;
-                    $item_article->id_article_item_article = $article->id_article;
-                    $item_article->image_item_article = $image_data['url_file'];
-                    $item_article->images_id_item_article = $images->id_images;
-                    if ($item_article->updateImageItem()) {
-                        $article->abortTransaccion();
-                        $item_article->abortTransaccion();
-                        $images->abortTransaccion();
-                        return true;
-                    }
-
                 }
             }
 
-            $article->endTransaccion();
+            $mysql->endTransaccion();
             // $item_article->endTransaccion();
             // $images->endTransaccion();
 
@@ -410,6 +414,9 @@ function evaluate(&$data) {
             return false;
 
         } catch (\Exception $e) {
+            if ($mysql->getInTransaction()) {
+                $mysql->abortTransaccion();
+            }
             Globals::updateResponse(501, $e->getMessage(), $e->getMessage(), basename(__FILE__, ".php"), __FUNCTION__, $_SERVER['REQUEST_METHOD']);
             return true;
         }

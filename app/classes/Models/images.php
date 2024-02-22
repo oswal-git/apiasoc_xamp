@@ -89,6 +89,19 @@ class Images extends Mysql {
         return $response;
     }
 
+    public function deleteAllArticleImages() {
+        $sql = "DELETE FROM images
+                WHERE article_id_images = ? ";
+
+        Helper::writeLog('$sql', $sql);
+        $arrData = array(
+            $this->article_id_images,
+        );
+        $response = $this->delete($sql, $arrData);
+
+        return $response;
+    }
+
     public function deleteImages() {
         $sql = "DELETE FROM images
                 WHERE id_images = ? ";
@@ -143,7 +156,9 @@ class Images extends Mysql {
 
     public function fillAsoc($record) {
         foreach ($record as $key => $value) {
-            $this->$key = $value;
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
         }
     }
 }

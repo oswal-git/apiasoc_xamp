@@ -46,6 +46,36 @@ class User extends Mysql {
 
     }
 
+    // Método mágico para clonar el objeto
+    public function __clone() {
+        // Crear una nueva instancia de la misma clase
+        // Devolver la nueva instancia
+        return new self(
+            $this->id_user,
+            $this->id_asociation_user,
+            $this->user_name_user,
+            $this->email_user,
+            $this->password_user,
+            $this->recover_password_user,
+            $this->token_user,
+            $this->token_exp_user,
+            $this->question_user,
+            $this->answer_user,
+            $this->profile_user,
+            $this->status_user,
+            $this->name_user,
+            $this->last_name_user,
+            $this->avatar_user,
+            $this->phone_user,
+            $this->date_deleted_user,
+            $this->date_created_user,
+            $this->date_updated_user,
+            $this->date_last_notification_user,
+            $this->time_notifications_user,
+            $this->language_user,
+        );
+    }
+
     public function userCreate() {
 
         $in_password = $this->password_user;
@@ -176,60 +206,6 @@ class User extends Mysql {
             return true;
         }
     }
-
-    // public function getDataUserById() {
-
-    //     $arrData = array(
-    //         $this->id_user,
-    //     );
-
-    //     $sql = "SELECT      u.id_user
-    //                     ,u.id_asociation_user
-    //                     ,u.user_name_user
-    //                     ,u.email_user
-    //                     ,u.password_user
-    //                     ,u.token_user
-    //                     ,u.token_exp_user
-    //                     ,u.recover_password_user
-    //                     ,u.profile_user
-    //                     ,u.status_user
-    //                     ,u.name_user
-    //                     ,u.last_name_user
-    //                     ,u.avatar_user
-    //                     ,u.phone_user
-    //                     , COALESCE(u.date_deleted_user,'') as date_deleted_user
-    //                     , u.date_created_user
-    //                     , COALESCE(u.date_updated_user,'') as date_updated_user
-    //                     ,u.time_notifications_user
-    //                     ,u.language_user
-    //                     ,a.long_name_asociation
-    //                     ,a.short_name_asociation
-    //                     ,a.logo_asociation
-    //                     ,a.email_asociation
-    //                     ,a.name_contact_asociation
-    //                     ,a.phone_asociation
-    //             FROM users u
-    //             LEFT OUTER JOIN asociations a
-    //               ON ( u.id_asociation_user = a.id_asociation )
-    //             WHERE u.id_user = ?;";
-
-    //     $response = $this->getAll($sql, $arrData);
-    //     if ($response) {
-    //         return $response;
-    //     }
-    //     if (Globals::getResult()['num_records'] == 1) {
-    //         $this->fillUser(Globals::getResult()['records'][0]);
-    //         return $response;
-    //     }
-    //     if (Globals::getResult()['num_records'] == 0) {
-    //         Globals::updateResponse(404, 'Record not found', 'Record not found', basename(__FILE__, ".php"), __FUNCTION__);
-    //         return true;
-    //     }
-    //     if (Globals::getResult()['num_records'] > 1) {
-    //         Globals::updateResponse(404, 'Duplicate record', 'Duplicate record', basename(__FILE__, ".php"), __FUNCTION__);
-    //         return true;
-    //     }
-    // }
 
     public function existUserByAsociationUsername() {
 

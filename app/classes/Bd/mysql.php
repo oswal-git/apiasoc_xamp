@@ -15,11 +15,15 @@ class Mysql extends Connection {
     private $procedure;
     private $strQuery;
     private $arrValues;
+    private $inTransaction;
 
     public function __construct() {
 
-        $this->db = new Connection();
-        $this->db = $this->db->connection();
+        // $this->db = new Connection();
+        // // $this->db = $this->db->connection();
+        // $this->db = $this->db::getInstance()->connection();
+        $this->inTransaction = false;
+        $this->db = parent::getInstance()->connection();
     }
 
     public function insert(string $strQuery, array $arrValues) {
@@ -158,13 +162,20 @@ class Mysql extends Connection {
 
     public function initTransaccion() {
         $this->db->beginTransaction();
+        $this->inTransaction = true;
     }
 
     public function endTransaccion() {
         $this->db->commit();
+        $this->inTransaction = false;
     }
 
     public function abortTransaccion() {
         $this->db->rollBack();
+        $this->inTransaction = false;
+    }
+
+    public function getInTransaction() {
+        return $this->inTransaction;
     }
 }

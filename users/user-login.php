@@ -15,7 +15,9 @@ function evaluate(&$data) {
         $asoc = new Asoc();
 
         foreach ($data as $key => $value) {
-            $auth->$key = $value;
+            if (property_exists($auth, $key)) {
+                $auth->$key = $value;
+            }
         }
 
         $in_password = $auth->password_user;
@@ -38,7 +40,7 @@ function evaluate(&$data) {
             return true;
         }
 
-        $auth->token_exp_user = time() + 60 * 60 * 6; // 6 hours
+        $auth->token_exp_user = time() + 60 * 60 * 24 * 365; // second * minuts * hours * days ...
         $auth->token_user = $auth->createTokenJwt();
         // echo "token: " . $auth->token_user . "\n";
         if ($auth->updateToken()) {

@@ -79,7 +79,9 @@ function evaluate(&$data) {
         $user_old = clone $user;
 
         foreach ($data as $key => $value) {
-            $user->$key = $value;
+            if (property_exists($user, $key)) {
+                $user->$key = $value;
+            }
         }
 
         if ($user->updateProfileStatus()) {

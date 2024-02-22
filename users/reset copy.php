@@ -16,8 +16,10 @@ function evaluate(&$data) {
         $asoc = new Asoc();
 
         foreach ($data as $key => $value) {
+            if (property_exists($auth, $key)) {
             $auth->$key = $value;
             // Helper::writeLog('$auth->$key', $auth->$key . ' = ' . $value);
+        }
         }
 
         $auth->getUserByEmail();

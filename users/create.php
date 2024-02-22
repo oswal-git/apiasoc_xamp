@@ -84,7 +84,9 @@ function evaluate(&$data) {
             return true;
         }
         foreach ($data as $key => $value) {
-            $user->$key = $value;
+            if (property_exists($user, $key)) {
+                $user->$key = $value;
+            }
         }
 
         if ($user->id_asociation_user > 0) {

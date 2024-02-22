@@ -72,7 +72,9 @@ function evaluate(&$data) {
         }
 
         foreach ($data as $key => $value) {
-            $asoc->$key = $value;
+            if (property_exists($asoc, $key)) {
+                $asoc->$key = $value;
+            }
         }
 
         if ($asoc->createAsociation()) {
